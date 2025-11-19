@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Syarat Kemasukan - SmartUMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/syarat.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 Syarat Kemasukan Program</h1>
+            <a href="/" class="back-btn">← Kembali ke Chatbot</a>
+        </div>
+
+        <div class="content-wrapper">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="search-box">
+                    <h2>🔍 Cari Program</h2>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Cari nama program, kod, atau universiti...">
+                </div>
+
+                <div class="category-filter">
+                    <h3>Kategori</h3>
+                    <select id="categoryFilter" class="filter-select">
+                        <option value="">Semua Kategori</option>
+                    </select>
+                </div>
+
+                <div class="program-list" id="programList">
+                    <div class="loading-state">
+                        <div class="loading-spinner"></div>
+                        <p>Memuatkan program...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <div class="detail-area" id="detailArea">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <h2>Pilih Program</h2>
+                        <p>Pilih program dari senarai di sebelah kiri untuk melihat syarat kemasukan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+        let programs = [];
+        let selectedProgram = null;
+        let categories = new Set();
+
+        // Fetch programs from Flask API (programs.json)
+        async function fetchPrograms() {
+            try {
+                const response = await fetch('/api/programs'); // Make sure your Flask route serves programs.json here
+                const data = await response.json();
+                if (data.success && data.programs) {
+                    programs = data.programs;
+
+                    // Extract unique categories
+                    programs.forEach(p => {
+                        if (p.kategori) categories.add(p.kategori);
+                    });
+
+                    populateCategoryFilter();
+                    displayPrograms(programs);
+                } else {
+                    showError('Tiada data program tersedia');
+                }
+            } catch (err) {
+                console.error('Error fetching programs:', err);
+                showError('Gagal memuatkan data program.');
+            }
+        }
+
+        function populateCategoryFilter() {
+            const select = document.getElementById('categoryFilter');
+            select.innerHTML = '<option value="">Semua Kategori</option>';
+            Array.from(categories).sort().forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.textContent = cat;
+                select.appendChild(opt);
+            });
+        }
+
+        document.getElementById('categoryFilter').addEventListener('change', () => {
+            const cat = document.getElementById('categoryFilter').value;
+            const query = document.getElementById('searchInput').value;
+            filterPrograms(query, cat);
+        });
+
+        document.getElementById('searchInput').addEventListener('input', () => {
+            const query = document.getElementById('searchInput').value;
+            const cat = document.getElementById('categoryFilter').value;
+            filterPrograms(query, cat);
+        });
+
+        function filterPrograms(query = '', category = '') {
+            const q = query.toLowerCase();
+            const filtered = programs.filter(p => {
+                const matchSearch = !q || p.nama_program.toLowerCase().includes(q) || p.kod_program.toLowerCase().includes(q) || p.universiti.toLowerCase().includes(q);
+                const matchCategory = !category || p.kategori === category;
+                return matchSearch && matchCategory;
+            });
+            displayPrograms(filtered);
+        }
+
+        function displayPrograms(list) {
+            const container = document.getElementById('programList');
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = '<p class="empty-text">📭 Tiada program dijumpai</p>';
+                return;
+            }
+
+            list.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'program-item';
+                div.innerHTML = `
+                    <h3>${p.nama_program}</h3>
+                    <div class="code">${p.kod_program}</div>
+                    <div class="university">${p.universiti}</div>
+                `;
+                div.onclick = () => selectProgram(p, div);
+                container.appendChild(div);
+            });
+        }
+
+        function selectProgram(program, element) {
+            selectedProgram = program;
+            document.querySelectorAll('.program-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+
+            const detailArea = document.getElementById('detailArea');
+            detailArea.innerHTML = `
+                <div class="program-detail">
+                    <div class="program-header">
+                        <span class="program-code-badge">${program.kod_program || 'N/A'}</span>
+                        <h1 class="program-title">${program.nama_program}</h1>
+                        <p class="program-university">${program.universiti}</p>
+                        <p class="program-faculty">${program.fakulti || ''}</p>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-card blue">
+                            <div class="info-card-label">⏱️ Tempoh Pengajian</div>
+                            <div class="info-card-value">${program.tempoh || 'Tidak dinyatakan'}</div>
+                        </div>
+                        <div class="info-card green">
+                            <div class="info-card-label">📚 Kategori</div>
+                            <div class="info-card-value">${program.kategori || 'Umum'}</div>
+                        </div>
+                    </div>
+
+                    <div class="requirements-section">
+                        <h2>📋 Syarat Kemasukan</h2>
+                        <div class="requirement-item">
+                            <div class="requirement-content">
+                                ${program.syarat_kemasukan || 'Sila rujuk pihak universiti untuk maklumat lanjut.'}
+                            </div>
+                        </div>
+                    </div>
+
+                    ${program.prospek_kerjaya ? `
+                    <div class="career-section">
+                        <h2>💼 Prospek Kerjaya</h2>
+                        <div class="career-content">
+                            ${program.prospek_kerjaya}
+                        </div>
+                    </div>` : ''}
+                </div>
+            `;
+        }
+
+        function showError(msg) {
+            document.getElementById('programList').innerHTML = `<p class="error-text">⚠️ ${msg}</p>`;
+        }
+
+        window.onload = fetchPrograms;
+    </script>
+</body>
+</html>

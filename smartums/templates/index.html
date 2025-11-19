@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 SmartUms Chatbot with History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <button class="toggle-sidebar-btn" onclick="toggleSidebar()">☰</button>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <h1>🤖 SmartUMS Chatbot</h1>
+            </div>
+            <button class="feedback-btn" onclick="openFeedbackModal()">💬 Feedback</button>
+        </div>
+
+        <div class="container-content">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-title">💬 Chat History</div>
+
+                <div class="history-list" id="historyList">
+                    <p style="text-align:center; padding:20px; color:#999;">No history yet. Start chatting!</p>
+                </div>
+
+                <div class="history-actions">
+                    <button class="history-btn new-chat-btn" onclick="startNewChat()">
+                        ➕ New Chat
+                    </button>
+                    <button class="history-btn clear-history-btn" onclick="clearAllHistory()">
+                        🗑️ Clear History
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-chat">
+                <div class="feature-buttons">
+                    <a href="/carian-program" class="feature-btn">🎓 Carian Program</a>
+                    <a href="/syarat-kemasukan" class="feature-btn">📋 Syarat Kemasukan</a>
+                    <a href="/classlocator" class="feature-btn">📍 Class Locator</a>
+                    <a href="/contact" class="feature-btn">📞 Contact</a>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome">
+                        <h2>Welcome! 👋</h2>
+                        <p>I'm your SmartUMS AI assistant. Ask me anything!</p>
+                        
+                        <div class="welcome-features">
+                            <h3>✨ Features Available:</h3>
+                            <ul class="feature-list">
+                                <li>🤖 <strong>AI Chat:</strong> Ask about UMS</li>
+                                <li>🎓 <strong>Program Search:</strong> Find programs</li>
+                                <li>💡 <strong>Academic Help:</strong> Get guidance</li>
+                                <li>💾 <strong>Chat History:</strong> Auto-saved conversations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    🤔 SmartUms is thinking...
+                </div>
+
+                <div class="chat-input-area">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="chatInput" 
+                            class="chat-input" 
+                            placeholder="Type your message... (Press Enter to send)"
+                            rows="1"
+                        ></textarea>
+                        <button class="btn btn-send" id="sendBtn" onclick="sendMessage()">
+                            Send 🚀
+                        </button>
+                        <button class="btn btn-clear" onclick="clearChat()">
+                            Clear 🗑️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-modal" id="feedbackModal">
+        <div class="feedback-content">
+            <div class="feedback-header">
+                <h2>Share Your Feedback</h2>
+                <button class="close-btn" onclick="closeFeedbackModal()">&times;</button>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                ✓ Thank you! Your feedback has been received.
+            </div>
+
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="fbName">Name</label>
+                    <input type="text" id="fbName" placeholder="Your name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="fbEmail">Email</label>
+                    <input type="email" id="fbEmail" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating" id="ratingStars">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="fbRating" value="5">
+                </div>
+
+                <div class="form-group">
+                    <label for="fbCategory">Category</label>
+                    <select id="fbCategory">
+                        <option value="general">General Feedback</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="performance">Performance</option>
+                        <option value="accuracy">Response Accuracy</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="fbMessage">Message</label>
+                    <textarea id="fbMessage" placeholder="Your feedback..." required></textarea>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="fbRecommend" checked>
+                    <label for="fbRecommend">I would recommend this chatbot</label>
+                </div>
+
+                <div class="feedback-buttons">
+                    <button type="submit" class="feedback-submit-btn">Submit</button>
+                    <button type="button" class="feedback-cancel-btn" onclick="closeFeedbackModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCfK4nCoo-DVH_K5zLspglcnFjvLK1CL2A",
+            authDomain: "smartums-feedback.firebaseapp.com",
+            projectId: "smartums-feedback",
+            storageBucket: "smartums-feedback.firebasestorage.app",
+            messagingSenderId: "814627859215",
+            appId: "1:814627859215:web:92b919f7ac350fae6e2c7a",
+            measurementId: "G-372D93YSL0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        
+        //  GOOGLE APPS SCRIPT WEB APP URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzrExaldwikulUW8uKlXvq_Bkypytf3vsTcli_Q3cyiBWAplXmx8ObGluM85UY8PumD/exec";
+
+        // ============ CHAT HISTORY SYSTEM ============
+        const STORAGE_KEY = 'smartums_chat_history';
+        let currentSessionId = generateSessionId();
+        let chatSessions = loadChatHistory();
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function loadChatHistory() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            return stored ? JSON.parse(stored) : {};
+        }
+
+        function saveChatHistory() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(chatSessions));
+            updateHistoryUI();
+        }
+
+        function getCurrentSession() {
+            if (!chatSessions[currentSessionId]) {
+                chatSessions[currentSessionId] = {
+                    id: currentSessionId,
+                    title: 'New Chat',
+                    messages: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+            }
+            return chatSessions[currentSessionId];
+        }
+
+        function addMessageToHistory(sender, content, type) {
+            const session = getCurrentSession();
+            session.messages.push({
+                sender,
+                content,
+                type,
+                timestamp: new Date().toISOString()
+            });
+            session.updatedAt = new Date().toISOString();
+            
+            if (type === 'user' && session.messages.length === 1) {
+                session.title = content.substring(0, 40) + (content.length > 40 ? '...' : '');
+            }
+            
+            saveChatHistory();
+        }
+
+        function updateHistoryUI() {
+            const historyList = document.getElementById('historyList');
+            const sessions = Object.values(chatSessions).sort((a, b) => 
+                new Date(b.updatedAt) - new Date(a.updatedAt)
+            );
+
+            if (sessions.length === 0) {
+                historyList.innerHTML = '<p style="text-align:center; padding:20px; color:#999;">No history yet</p>';
+                return;
+            }
+
+            historyList.innerHTML = sessions.map(session => {
+                const date = new Date(session.updatedAt);
+                const timeStr = date.toLocaleString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const isActive = session.id === currentSessionId ? 'active' : '';
+                
+                return `
+                    <div class="history-item ${isActive}" onclick="loadSession('${session.id}')">
+                        <div class="history-title">${session.title}</div>
+                        <div class="history-time">${timeStr} • ${session.messages.length} messages</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.loadSession = function(sessionId) {
+            currentSessionId = sessionId;
+            const session = chatSessions[sessionId];
+            
+            if (!session) {
+                console.error('Session not found:', sessionId);
+                return;
+            }
+            
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            session.messages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message ' + msg.type + '-message';
+
+                const msgDate = new Date(msg.timestamp);
+                const time = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const avatar = msg.type === 'user' ? '👤' : '🤖';
+
+                messageDiv.innerHTML = `
+                    <div class="message-header">
+                        <div class="avatar ${msg.type}-avatar">${avatar}</div>
+                        <span class="sender-name">${msg.sender}</span>
+                        <span class="timestamp">${time}</span>
+                    </div>
+                    <div class="message-content">${msg.content}</div>
+                `;
+
+                chatMessages.appendChild(messageDiv);
+            });
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            updateHistoryUI();
+            
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('show');
+            }
+        };
+
+        window.startNewChat = function() {
+            currentSessionId = generateSessionId();
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="welcome">
+                    <h2>New Chat Started! ✨</h2>
+                    <p>Ask me anything about UMS!</p>
+                </div>
+            `;
+            updateHistoryUI();
+        };
+
+        window.clearAllHistory = function() {
+            if (confirm('Clear all chat history? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                chatSessions = {};
+                currentSessionId = generateSessionId();
+                updateHistoryUI();
+                startNewChat();
+            }
+        };
+
+        window.toggleSidebar = function() {
+            document.getElementById('sidebar').classList.toggle('show');
+        };
+
+        // ============ CHATBOT FUNCTIONALITY ============
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+        });
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function addMessage(sender, content, type, saveToHistory = true) {
+            const welcome = chatMessages.querySelector('.welcome');
+            if (welcome) welcome.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + type + '-message';
+
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const avatar = type === 'user' ? '👤' : '🤖';
+
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <div class="avatar ${type}-avatar">${avatar}</div>
+                    <span class="sender-name">${sender}</span>
+                    <span class="timestamp">${time}</span>
+                </div>
+                <div class="message-content">${content}</div>
+            `;
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            if (saveToHistory) {
+                addMessageToHistory(sender, content, type);
+            }
+        }
+
+        window.sendMessage = async function() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addMessage('You', message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            setLoading(true);
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                if (data.reply) {
+                    let botResponse = data.reply;
+                    
+                    if (data.suggest_program_search) {
+                        botResponse += '<div class="program-search-suggestion"><a href="/carian-program" class="program-search-btn">🎓 Buka Carian Program</a></div>';
+                    }
+                    
+                    addMessage('SmartUms', botResponse, 'bot');
+                } else {
+                    throw new Error('No response from Bot.');
+                }
+            } catch (error) {
+                addMessage('Error', '⚠️ Something went wrong: ' + error.message, 'error');
+            }
+
+            setLoading(false);
+        };
+
+        function setLoading(isLoading) {
+            loadingIndicator.classList.toggle('show', isLoading);
+            sendBtn.disabled = isLoading;
+            chatInput.disabled = isLoading;
+            if (!isLoading) chatInput.focus();
+        }
+
+        window.clearChat = function() {
+            if (confirm('Clear current chat? (History will be preserved)')) {
+                chatMessages.innerHTML = `
+                    <div class="welcome">
+                        <h2>Chat Cleared! ✨</h2>
+                        <p>Start a new conversation</p>
+                    </div>
+                `;
+            }
+        };
+
+        // ============ FEEDBACK FUNCTIONALITY ============
+        const feedbackModal = document.getElementById('feedbackModal');
+        const feedbackForm = document.getElementById('feedbackForm');
+        const ratingStars = document.querySelectorAll('#ratingStars .star');
+        const fbRatingInput = document.getElementById('fbRating');
+
+        function updateStars(rating) {
+            ratingStars.forEach(star => {
+                if (parseInt(star.dataset.rating) <= rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        ratingStars.forEach(star => {
+            star.addEventListener('click', () => {
+                fbRatingInput.value = star.dataset.rating;
+                updateStars(parseInt(star.dataset.rating));
+            });
+        });
+
+        // ✅ FIXED: Single feedback form submission handler
+        feedbackForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('.feedback-submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Submitting...';
+
+            const feedback = {
+                name: document.getElementById('fbName').value,
+                email: document.getElementById('fbEmail').value,
+                rating: parseInt(document.getElementById('fbRating').value),
+                category: document.getElementById('fbCategory').value,
+                message: document.getElementById('fbMessage').value,
+                recommend: document.getElementById('fbRecommend').checked,
+                timestamp: serverTimestamp(),
+                submittedAt: new Date().toISOString()
+            };
+
+            console.log('📤 Submitting feedback:', feedback);
+
+            try {
+                // 1. Save to Firestore
+                console.log('💾 Saving to Firestore...');
+                const docRef = await addDoc(collection(db, "feedbacks"), feedback);
+                console.log('✅ Firestore saved! Doc ID:', docRef.id);
+                
+                // 2. Send email notification via Google Apps Script
+                console.log('📧 Sending email notification...');
+                const emailData = {
+                    name: feedback.name,
+                    email: feedback.email,
+                    rating: feedback.rating,
+                    category: feedback.category,
+                    message: feedback.message,
+                    recommend: feedback.recommend ? 'Yes' : 'No',
+                    submittedAt: feedback.submittedAt
+                };
+                
+                // Send to Google Apps Script
+                const emailResponse = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: JSON.stringify(emailData)
+                });
+
+                console.log('📧 Email response status:', emailResponse.status);
+                
+                // Show success message
+                const successMsg = document.getElementById('successMessage');
+                successMsg.textContent = '✅ Thank you! Your feedback has been saved and sent to our team.';
+                successMsg.classList.add('show');
+
+                // Reset form
+                feedbackForm.reset();
+                updateStars(5);
+                
+                // Close modal after 2 seconds
+                setTimeout(() => {
+                    closeFeedbackModal();
+                }, 2500);
+                
+            } catch (error) {
+                console.error('❌ Error submitting feedback:', error);
+                
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.background = '#f8d7da';
+                successMsg.style.color = '#721c24';
+                successMsg.textContent = '⚠️ Error: ' + error.message;
+                successMsg.classList.add('show');
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('show');
+                    successMsg.style.background = '#d4edda';
+                    successMsg.style.color = '#155724';
+                }, 5000);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        window.openFeedbackModal = function() {
+            feedbackModal.classList.add('show');
+        };
+
+        window.closeFeedbackModal = function() {
+            feedbackModal.classList.remove('show');
+            feedbackForm.reset();
+            updateStars(5);
+            document.getElementById('successMessage').classList.remove('show');
+        };
+
+        // Initialize
+        updateStars(5);
+        updateHistoryUI();
+        
+        console.log('🚀 SmartUMS Chatbot initialized!');
+        console.log('📧 Email script URL:', GOOGLE_SCRIPT_URL);
+    </script>
+</body>
+</html>

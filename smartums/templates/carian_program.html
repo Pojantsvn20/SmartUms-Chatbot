@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 Carian Program - SmartUms</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/carian_program.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎓 Carian Program Universiti</h1>
+            <p>Cari dan temui program universiti yang sesuai untuk masa depan anda</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">🤖 Kembali ke Chatbot</a>
+            <a href="#" class="nav-btn" onclick="location.reload()">🔄 Muat Semula</a>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-title">
+                <h2>🔍 Cari Program Impian Anda</h2>
+                <p>Masukkan kata kunci, pilih kategori dan kelayakan untuk mencari program yang sesuai</p>
+            </div>
+            
+            <form class="search-form" id="searchForm">
+                <div class="form-group">
+                    <label for="keyword">🔍 Kata Kunci</label>
+                    <input 
+                        type="text" 
+                        id="keyword" 
+                        class="form-input" 
+                        placeholder="Contoh: komputer, kejuruteraan, perubatan..."
+                    >
+                </div>
+                <div class="form-group">
+                    <label for="kategori">📂 Kategori Program</label>
+                    <select id="kategori" class="form-select">
+                        <option value="">Semua Kategori</option>
+                        <option value="stem">🔬 STEM</option>
+                        <option value="kejuruteraan">⚙️ Kejuruteraan</option>
+                        <option value="perubatan">🏥 Perubatan</option>
+                        <option value="kesihatan">💊 Kesihatan</option>
+                        <option value="perniagaan">💼 Perniagaan</option>
+                        <option value="seni">🎨 Seni & Reka Bentuk</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="kelayakan">🎓 Kelayakan Calon</label>
+                    <select id="kelayakan" class="form-select">
+                        <option value="">Semua Kelayakan</option>
+                        <option value="spm">📚 SPM</option>
+                        <option value="stpm">📖 STPM/Matriculation</option>
+                        <option value="diploma">🎓 Diploma</option>
+                        <option value="degree">🏆 Degree</option>
+                        <option value="master">👨‍🎓 Master</option>
+                    </select>
+                </div>
+                <button type="submit" class="search-btn">
+                    🚀 Cari Sekarang
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <!-- Welcome Message -->
+            <div class="welcome-message" id="welcomeMessage">
+                <h2>Selamat Datang! 👋</h2>
+                <p>
+                    Sistem Carian Program Universiti SmartUms membantu anda mencari program pengajian yang sesuai 
+                    dengan minat dan kelayakan anda. Gunakan alat carian di atas untuk memulakan.
+                </p>
+                
+                <div class="welcome-features">
+                    <div class="feature-box" id="feature-smart-search" title="Fokus ke carian">
+                        <h3>🔍 Carian Pintar</h3>
+                        <p>Cari berdasarkan nama program, universiti, atau kata kunci berkaitan — klik untuk fokus carian.</p>
+                    </div>
+                    <div class="feature-box" id="feature-filter-kategori" title="Buka pilihan kategori">
+                        <h3>📂 Filter Kategori</h3>
+                        <p>Saring program mengikut bidang seperti STEM, Perniagaan, Kesihatan — klik untuk buka pilihan.</p>
+                    </div>
+                    <div class="feature-box" id="feature-filter-kelayakan" title="Buka pilihan kelayakan">
+                        <h3>🎓 Filter Kelayakan</h3>
+                        <p>Cari program berdasarkan kelayakan akademik anda (SPM, STPM, Diploma, dll) — klik untuk buka pilihan.</p>
+                    </div>
+                    <div class="feature-box" id="feature-details" title="Maklumat lengkap program">
+                        <h3>📊 Maklumat Lengkap</h3>
+                        <p>Dapatkan butiran syarat kemasukan, tempoh, dan prospek kerjaya — klik untuk maklumat lanjut.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="loading" id="loadingIndicator">
+                <div class="loading-spinner"></div>
+                Mencari program yang sesuai untuk anda...
+            </div>
+
+            <!-- No Results -->
+            <div class="no-results" id="noResults">
+                <h2>❌ Tiada Hasil Ditemui</h2>
+                <p>Maaf, tiada program yang sepadan dengan carian anda. Cuba dengan kata kunci yang berbeza atau pilih kategori/kelayakan lain.</p>
+            </div>
+
+            <!-- Results Header -->
+            <div class="results-header" id="resultsHeader" style="display: none;">
+                <div class="results-count" id="resultsCount"></div>
+            </div>
+
+            <!-- Results Container -->
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <!-- Maklumat Lengkap Modal -->
+    <div class="modal-backdrop" id="detailsModal">
+        <div class="modal-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <h3>📊 Maklumat Lengkap Program</h3>
+                <div class="modal-close" id="modalClose">Tutup ✖</div>
+            </div>
+            <div id="modalContent">
+                <p>Pilih satu program dari senarai keputusan untuk melihat maklumat terperinci mengenai syarat kemasukan, tempoh pengajian, dan prospek kerjaya. Jika anda belum berbuat demikian, jalankan carian terlebih dahulu.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🚀 Carian Program page loaded successfully!');
+        
+        const searchForm = document.getElementById('searchForm');
+        const keywordInput = document.getElementById('keyword');
+        const kategoriSelect = document.getElementById('kategori');
+        const kelayakanSelect = document.getElementById('kelayakan');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const noResults = document.getElementById('noResults');
+        const resultsHeader = document.getElementById('resultsHeader');
+        const resultsCount = document.getElementById('resultsCount');
+        const resultsContainer = document.getElementById('resultsContainer');
+
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('🔍 Search form submitted');
+            searchPrograms();
+        });
+
+        async function searchPrograms() {
+            const keyword = keywordInput.value.trim();
+            const kategori = kategoriSelect.value;
+            const kelayakan = kelayakanSelect.value;
+            
+            console.log(`🔍 Searching with keyword: "${keyword}", kategori: "${kategori}", kelayakan: "${kelayakan}"`);
+
+            // Show loading
+            setLoading(true);
+            hideAllSections();
+
+            try {
+                const response = await fetch('/search-programs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword, kategori, lepasan: kelayakan })
+                });
+
+                console.log('📡 Response status:', response.status);
+                const data = await response.json();
+                console.log('📊 Response data:', data);
+
+                if (data.success) {
+                    displayResults(data.results, data.total);
+                } else {
+                    throw new Error(data.error || 'Search failed');
+                }
+            } catch (error) {
+                console.error('❌ Search error:', error);
+                showNoResults();
+            }
+
+            setLoading(false);
+        }
+
+        function displayResults(programs, total) {
+            console.log(`📋 Displaying ${total} programs`);
+            
+            if (total === 0) {
+                showNoResults();
+                return;
+            }
+
+            // Show results header
+            resultsHeader.style.display = 'flex';
+            resultsCount.textContent = `🎯 ${total} program ditemui`;
+
+            // Clear previous results
+            resultsContainer.innerHTML = '';
+
+            // Display each program
+            programs.forEach((program, index) => {
+                setTimeout(() => {
+                    const programCard = createProgramCard(program);
+                    resultsContainer.appendChild(programCard);
+                }, index * 100); // Stagger animation
+            });
+        }
+
+        function createProgramCard(program) {
+            const card = document.createElement('div');
+            card.className = 'program-card';
+            
+            card.innerHTML = `
+                <div class="program-header">
+                    <div>
+                        <div class="program-title">${program.nama_program}</div>
+                        <div class="program-university">${program.universiti}</div>
+                        <div class="program-faculty">${program.fakulti}</div>
+                    </div>
+                    <div class="program-code">${program.kod_program}</div>
+                </div>
+
+                <div class="program-details">
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            ⏱️ Tempoh Pengajian
+                        </div>
+                        <div class="detail-value">${program.tempoh}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            📋 Syarat Kemasukan
+                        </div>
+                        <div class="detail-value">${program.syarat_kemasukan}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            💼 Prospek Kerjaya
+                        </div>
+                        <div class="detail-value">${program.prospek_kerjaya}</div>
+                    </div>
+                </div>
+
+                <div class="program-tags">
+                    <div class="program-category">${program.kategori}</div>
+                    <div class="program-kelayakan">${program.lepasan || program.kelayakan}</div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function setLoading(isLoading) {
+            loadingIndicator.classList.toggle('show', isLoading);
+            console.log(`⏳ Loading state: ${isLoading}`);
+        }
+
+        function hideAllSections() {
+            welcomeMessage.style.display = 'none';
+            noResults.classList.remove('show');
+            resultsHeader.style.display = 'none';
+            resultsContainer.innerHTML = '';
+        }
+
+        function showNoResults() {
+            noResults.classList.add('show');
+            console.log('❌ Showing no results message');
+        }
+
+        function showWelcomeMessage() {
+            welcomeMessage.style.display = 'block';
+        }
+
+        // Initial state
+        showWelcomeMessage();
+        console.log('✅ Welcome message displayed');
+
+        // ========== Feature box interactions ==========
+        const featureSmart = document.getElementById('feature-smart-search');
+        const featureKategori = document.getElementById('feature-filter-kategori');
+        const featureKelayakan = document.getElementById('feature-filter-kelayakan');
+        const featureDetails = document.getElementById('feature-details');
+        const detailsModal = document.getElementById('detailsModal');
+        const modalClose = document.getElementById('modalClose');
+
+        if(featureSmart){
+            featureSmart.addEventListener('click', ()=>{
+                keywordInput.focus();
+                keywordInput.scrollIntoView({behavior:'smooth', block:'center'});
+                keywordInput.classList.add('highlight');
+                setTimeout(()=> keywordInput.classList.remove('highlight'), 800);
+            });
+        }
+
+        if(featureKategori){
+            featureKategori.addEventListener('click', ()=>{
+                kategoriSelect.focus();
+                kategoriSelect.scrollIntoView({behavior:'smooth', block:'center'});
+                // try to open select on desktop browsers by dispatching keyboard event
+                try{ const e = new MouseEvent('mousedown'); kategoriSelect.dispatchEvent(e); }catch(e){}
+            });
+        }
+
+        if(featureKelayakan){
+            featureKelayakan.addEventListener('click', ()=>{
+                kelayakanSelect.focus();
+                kelayakanSelect.scrollIntoView({behavior:'smooth', block:'center'});
+                try{ const e = new MouseEvent('mousedown'); kelayakanSelect.dispatchEvent(e); }catch(e){}
+            });
+        }
+
+        if(featureDetails){
+            featureDetails.addEventListener('click', ()=>{
+                // open modal; if results exist show first program summary
+                detailsModal.classList.add('show');
+                const firstCard = resultsContainer.querySelector('.program-card');
+                const modalContent = document.getElementById('modalContent');
+                if(firstCard){
+                    // copy program HTML into modal (trim to key fields)
+                    modalContent.innerHTML = `<div>${firstCard.querySelector('.program-title').outerHTML}`+
+                        `${firstCard.querySelector('.program-university').outerHTML}`+
+                        `${firstCard.querySelector('.program-faculty').outerHTML}`+
+                        `<hr/>`+
+                        `${firstCard.querySelector('.program-details').outerHTML}`+
+                        `</div>`;
+                } else {
+                    modalContent.innerHTML = '<p>Tiada keputusan untuk dipaparkan. Sila jalankan carian terlebih dahulu.</p>';
+                }
+            });
+        }
+
+        modalClose.addEventListener('click', ()=> detailsModal.classList.remove('show'));
+        detailsModal.addEventListener('click', (e)=>{ if(e.target === detailsModal) detailsModal.classList.remove('show'); });
+    </script>
+</body>
+</html>

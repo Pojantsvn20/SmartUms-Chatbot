@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "courseCode": "CS101",
+    "courseName": "Introduction to Programming",
+    "instructor": "Dr. Ahmad Ibrahim",
+    "building": "Block A",
+    "room": "101",
+    "time": "09:00 - 11:00",
+    "timeType": "morning",
+    "day": "Monday, Wednesday, Friday",
+    "capacity": 30,
+    "enrolled": 28,
+    "status": "available"
+  },
+  {
+    "id": 2,
+    "courseCode": "CS102",
+    "courseName": "Data Structures",
+    "instructor": "Prof. Siti Nurhaliza",
+    "building": "Block B",
+    "room": "205",
+    "time": "14:00 - 16:00",
+    "timeType": "afternoon",
+    "day": "Tuesday, Thursday",
+    "capacity": 25,
+    "enrolled": 25,
+    "status": "full"
+  },
+  {
+    "id": 3,
+    "courseCode": "CS103",
+    "courseName": "Database Management",
+    "instructor": "Dr. Mohd Hassan",
+    "building": "Lab 1",
+    "room": "Computer Lab",
+    "time": "10:00 - 12:00",
+    "timeType": "morning",
+    "day": "Monday, Wednesday",
+    "capacity": 20,
+    "enrolled": 15,
+    "status": "available"
+  },
+  {
+    "id": 1,
+    "courseCode": "CS10111",
+    "courseName": "uwuuu",
+    "instructor": "Dr. Ahmad Ibrahim",
+    "building": "Block A",
+    "room": "101",
+    "time": "09:00 - 11:00",
+    "timeType": "morning",
+    "day": "Monday, Wednesday, Friday",
+    "capacity": 30,
+    "enrolled": 28,
+    "status": "available"
+  }
+]

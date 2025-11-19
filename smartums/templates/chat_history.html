@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💬 Chat History - SmartUMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-content">
+                <h1>💬 Chat History</h1>
+            </div>
+            <a href="/" class="feedback-btn">🏠 Back to Chatbot</a>
+        </div>
+        <div class="container-content">
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-title">💬 Chat History</div>
+                <div class="history-list" id="historyList">
+                    <p style="text-align:center; padding:20px; color:#999;">No history yet. Start chatting!</p>
+                </div>
+                <div class="history-actions">
+                    <button class="history-btn new-chat-btn" onclick="startNewChat()">➕ New Chat</button>
+                    <button class="history-btn clear-history-btn" onclick="clearAllHistory()">🗑️ Clear History</button>
+                </div>
+            </div>
+            <div class="main-chat">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="welcome">
+                        <h2>Welcome! 👋</h2>
+                        <p>View your SmartUMS chat history here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/static/js/chat_history.js"></script>
+</body>
+</html>

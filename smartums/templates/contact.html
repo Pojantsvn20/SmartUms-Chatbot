@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📞 Contact Us - SmartUms</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/contact.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📞 Contact Us</h1>
+            <p>Reach out to our staff and admin for assistance</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-buttons">
+            <a href="/" class="nav-btn">🤖 Kembali ke Chatbot</a>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <div class="search-row">
+                <input id="contactSearch" class="search-input" type="search" placeholder="🔍 Search contacts by name, phone or email..." aria-label="Search contacts">
+                <button id="clearSearch" class="clear-btn" title="Clear search">✖</button>
+            </div>
+            <!-- Staff Contacts -->
+            <div class="staff-section">
+                <h2 class="section-title">👥 Staff Contacts</h2>
+                <div class="contacts-grid" id="contactsGrid">
+                    <!-- contacts will be loaded from /api/contacts -->
+                </div>
+                <div id="staffEmptyState" class="empty-state" style="display:none;">No staff contacts found.</div>
+            </div>
+
+            <!-- Admin BPA Contacts -->
+            <div class="admin-section">
+                <h2 class="section-title">🏢 Admin BPA Contacts</h2>
+                <div class="contacts-grid" id="contactsGridAdmin">
+                    <!-- admin contacts will also be loaded from /api/contacts -->
+                </div>
+                <div id="adminEmptyState" class="empty-state" style="display:none;">No admin contacts found.</div>
+            </div>
+        </div>
+
+        <!-- General Info -->
+        <div class="contact-section">
+            <h2 class="section-title">ℹ️ General Support</h2>
+            <div class="empty-state">
+                <p>For general inquiries, visit the <a href="https://www.ums.edu.my" style="color: #667eea; text-decoration: none;">UMS Official Website</a> or call the main line: +60 88 320 000.</p>
+                <p>Office Hours: Monday - Friday, 8:00 AM - 5:00 PM (GMT+8)</p>
+            </div>
+        </div>
+        <script>
+            // Enhanced contact loader with profile/initials, clear search, loading spinner, empty state
+            let contactsAll = [];
+            let loading = false;
+
+            function debounce(fn, ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; }
+
+            function getInitials(name) {
+                if (!name) return '';
+                const parts = name.split(' ');
+                return parts.length > 1 ? (parts[0][0] + parts[parts.length-1][0]).toUpperCase() : name[0].toUpperCase();
+            }
+
+            function renderContacts(){
+                const q = (document.getElementById('contactSearch').value || '').toLowerCase().trim();
+                const staffGrid = document.getElementById('contactsGrid');
+                const adminGrid = document.getElementById('contactsGridAdmin');
+                const staffEmpty = document.getElementById('staffEmptyState');
+                const adminEmpty = document.getElementById('adminEmptyState');
+                staffGrid.innerHTML = '';
+                adminGrid.innerHTML = '';
+                staffEmpty.style.display = 'none';
+                adminEmpty.style.display = 'none';
+
+                const filtered = contactsAll.filter(c=>{
+                    if(!c) return false;
+                    if(!q) return true;
+                    const name = (c.name||'').toLowerCase();
+                    const email = (c.email||'').toLowerCase();
+                    const phone = (c.phone||'').toLowerCase();
+                    return name.includes(q) || email.includes(q) || phone.includes(q);
+                });
+
+                let staffCount = 0, adminCount = 0;
+                filtered.forEach(c=>{
+                    const card = document.createElement('div');
+                    card.className = 'contact-card';
+                    card.innerHTML = `
+                        <div class="contact-profile">
+                            <div class="profile-circle">${getInitials(c.name)}</div>
+                        </div>
+                        <div class="contact-name">${c.name || ''}</div>
+                        <div class="contact-details">
+                            ${c.phone?`<div class="detail-item"><span class="detail-icon">📞</span><span>${c.phone}</span></div>`:''}
+                            ${c.email?`<div class="detail-item"><span class="detail-icon">✉️</span><a href="mailto:${c.email}" class="detail-link">${c.email}</a></div>`:''}
+                        </div>`;
+                    if((c.role||'').toLowerCase() === 'admin') { adminGrid.appendChild(card); adminCount++; } else { staffGrid.appendChild(card); staffCount++; }
+                });
+                if(staffCount === 0) staffEmpty.style.display = 'block';
+                if(adminCount === 0) adminEmpty.style.display = 'block';
+            }
+
+            function showLoadingSpinner(show) {
+                let spinner = document.getElementById('contactsLoadingSpinner');
+                if (!spinner) {
+                    spinner = document.createElement('div');
+                    spinner.id = 'contactsLoadingSpinner';
+                    spinner.className = 'loading-spinner';
+                    spinner.innerHTML = '<div class="spinner"></div><div>Loading contacts...</div>';
+                    document.querySelector('.contact-section').prepend(spinner);
+                }
+                spinner.style.display = show ? 'flex' : 'none';
+            }
+
+            async function loadContacts(){
+                showLoadingSpinner(true);
+                try{
+                    const res = await fetch('/api/contacts');
+                    const data = await res.json();
+                    if(!data.success) {
+                        console.warn('contacts api returned success=false');
+                        showLoadingSpinner(false);
+                        return;
+                    }
+                    contactsAll = data.contacts || [];
+                    renderContacts();
+                }catch(e){ console.error('Failed to load contacts', e); }
+                showLoadingSpinner(false);
+            }
+
+            document.addEventListener('DOMContentLoaded', ()=>{
+                const input = document.getElementById('contactSearch');
+                const clearBtn = document.getElementById('clearSearch');
+                input.addEventListener('input', debounce(renderContacts, 200));
+                clearBtn.addEventListener('click', ()=>{ input.value=''; renderContacts(); });
+                loadContacts();
+            });
+        </script>
+    </div>
+</body>
+</html>

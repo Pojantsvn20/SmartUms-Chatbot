@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "nama_program": "Bachelor of Science in Computer Science",
+    "universiti": "Universiti Malaysia Sabah (UMS)",
+    "fakulti": "Faculty of Computing and Informatics",
+    "kod_program": "CS001",
+    "tempoh": "3 tahun",
+    "syarat_kemasukan": "STPM: AAB including Mathematics, SPM: 5 credits including Mathematics and English",
+    "prospek_kerjaya": "Software Developer, AI Engineer, Data Analyst",
+    "kategori": "STEM"
+  },
+  {
+    "id": 2,
+    "nama_program": "Bachelor of Engineering in Civil Engineering",
+    "universiti": "Universiti Malaysia Sabah (UMS)",
+    "fakulti": "Faculty of Engineering",
+    "kod_program": "CE002",
+    "tempoh": "4 tahun",
+    "syarat_kemasukan": "STPM: AAB including Mathematics and Physics, SPM: 5 credits including Additional Mathematics",
+    "prospek_kerjaya": "Civil Engineer, Project Manager, Consultant",
+    "kategori": "Kejuruteraan"
+  },
+  {
+    "id": 3,
+    "nama_program": "Bachelor of Medicine",
+    "universiti": "Universiti Malaysia Sabah (UMS)",
+    "fakulti": "Faculty of Medicine and Health Sciences",
+    "kod_program": "MD003",
+    "tempoh": "5 tahun",
+    "syarat_kemasukan": "STPM: A*AA including Chemistry and Biology, SPM: 8A+ including sciences",
+    "prospek_kerjaya": "Medical Doctor, Researcher, Specialist",
+    "kategori": "Perubatan"
+  },
+
+    {
+    "id": 4,
+    "nama_program": "Bachelor of Medicinedasda",
+    "universiti": "Universiti Malaysia Sabah (UMS)",
+    "fakulti": "Faculty of Medicine and Health Sciences",
+    "kod_program": "MD003",
+    "tempoh": "5 tahun",
+    "syarat_kemasukan": "STPM: A*AA including Chemistry and Biology, SPM: 8A+ including sciences",
+    "prospek_kerjaya": "Medical Doctor, Researcher, Specialist",
+    "kategori": "Perubatan"
+  }
+]

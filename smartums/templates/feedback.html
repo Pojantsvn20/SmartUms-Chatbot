@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💬 Feedback - SmartUMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+</head>
+<body>
+    <div class="feedback-modal show" id="feedbackModal">
+        <div class="feedback-content">
+            <div class="feedback-header">
+                <h2>Share Your Feedback</h2>
+                <a href="/" class="close-btn">&times;</a>
+            </div>
+            <div class="success-message" id="successMessage">
+                ✓ Thank you! Your feedback has been received.
+            </div>
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label for="fbName">Name</label>
+                    <input type="text" id="fbName" placeholder="Your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="fbEmail">Email</label>
+                    <input type="email" id="fbEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating" id="ratingStars">
+                        <span class="star" data-rating="1">★</span>
+                        <span class="star" data-rating="2">★</span>
+                        <span class="star" data-rating="3">★</span>
+                        <span class="star" data-rating="4">★</span>
+                        <span class="star" data-rating="5">★</span>
+                    </div>
+                    <input type="hidden" id="fbRating" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="fbCategory">Category</label>
+                    <select id="fbCategory">
+                        <option value="general">General Feedback</option>
+                        <option value="bug">Bug Report</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="performance">Performance</option>
+                        <option value="accuracy">Response Accuracy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fbMessage">Message</label>
+                    <textarea id="fbMessage" placeholder="Your feedback..." required></textarea>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="fbRecommend" checked>
+                    <label for="fbRecommend">I would recommend this chatbot</label>
+                </div>
+                <div class="feedback-buttons">
+                    <button type="submit" class="feedback-submit-btn">Submit</button>
+                    <a href="/" class="feedback-cancel-btn">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script type="module" src="/static/js/feedback.js"></script>
+</body>
+</html>

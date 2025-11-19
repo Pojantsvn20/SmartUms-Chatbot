@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Ahmad Ibrahim",
+    "role": "Staff",
+    "phone": "+60 88 123 456",
+    "email": "ahmad.ibrahim@ums.edu.my"
+  },
+  {
+    "id": 2,
+    "name": "Prof. Siti Nurhaliza",
+    "role": "Staff",
+    "phone": "+60 88 123 457",
+    "email": "siti.nurhaliza@ums.edu.my"
+  },
+  {
+    "id": 3,
+    "name": "Dr. Mohd Hassan",
+    "role": "Staff",
+    "phone": "+60 88 123 458",
+    "email": "mohd.hassan@ums.edu.my"
+  },
+  {
+    "id": 4,
+    "name": "Admin BPA Officer 1",
+    "role": "Admin",
+    "phone": "+60 88 123 459",
+    "email": "admin.bpa1@ums.edu.my"
+  },
+  {
+    "id": 5,
+    "name": "Admin BPA Officer 2",
+    "role": "Admin",
+    "phone": "+60 88 123 460",
+    "email": "admin.bpa2@ums.edu.my"
+  },
+  {
+    "id": 6,
+    "name": "Admin BPA Supervisor",
+    "role": "Admin",
+    "phone": "+60 88 123 461",
+    "email": "bpa.supervisor@ums.edu.my"
+  }
+]
